@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "graphql-request": "^1.4.0",
+    "twilio": "^3.10.1"
+  }
+}
