@@ -19,7 +19,7 @@ export default (context, cb) => {
       phone
       firstName
     }
-    Question(dateToAsk: ${today}) {
+    Question(dateToAsk: "${today}") {
       text
     }
   }`
