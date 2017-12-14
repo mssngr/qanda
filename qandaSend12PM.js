@@ -2,7 +2,7 @@
 import twilio from 'twilio'
 import {request} from 'graphql-request'
 
-module.exports = (context, cb) => {
+export default (context, cb) => {
   const {
     TWILIO_ACCT_SID,
     TWILIO_AUTH_TOKEN,
@@ -11,7 +11,7 @@ module.exports = (context, cb) => {
     GRAPHCOOL_WEBTASK_AUTH_TOKEN,
   } = context.secrets
   const twilioClient = new twilio(TWILIO_ACCT_SID, TWILIO_AUTH_TOKEN)
-  
+
   const getMessageData = `{
     allUsers {
       phone
@@ -21,10 +21,10 @@ module.exports = (context, cb) => {
       text
     }
   }`
-  
+
   const errors = []
   const messages = []
-  
+
   request(GRAPHCOOL_SIMPLE_API_END_POINT, getMessageData)
     .then(data => {
       data.allUsers.forEach(user => {
@@ -41,7 +41,7 @@ module.exports = (context, cb) => {
         })
       })
     })
-  
+
   const anyErrors = (errors.length > 0) ? errors : null
   cb(anyErrors, messages)
 }
