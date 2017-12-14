@@ -9,7 +9,11 @@
     "twilio": "^3.10.1"
   },
   "scripts": {
-    "run qandaSend12PM": "curl https://wt-dd03113a65a5e0837cf22a7238d97ffd-0.run.webtask.io/qandaSend12PM",
-    "run qandaSend8PM": "curl https://wt-dd03113a65a5e0837cf22a7238d97ffd-0.run.webtask.io/qandaSend8PM"
+    "qandaSend12PM": "curl https://wt-dd03113a65a5e0837cf22a7238d97ffd-0.run.webtask.io/qandaSend12PM",
+    "qandaSend8PM": "curl https://wt-dd03113a65a5e0837cf22a7238d97ffd-0.run.webtask.io/qandaSend8PM"
+  },
+  "devDependencies": {
+    "eslint": "^4.13.1",
+    "eslint-plugin-eslint-comments": "^2.0.1"
   }
 }
