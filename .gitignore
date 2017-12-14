@@ -1,0 +1,14 @@
+.DS_Store
+
+# Logs
+logs
+*.log
+
+# Dependency directory
+node_modules
+
+# Git conflicts
+*.orig
+
+# Local environment variables
+.env
