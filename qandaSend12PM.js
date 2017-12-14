@@ -12,22 +12,26 @@ module.exports = (context, cb) => {
   } = context.secrets
   const twilioClient = new twilio(TWILIO_ACCT_SID, TWILIO_AUTH_TOKEN)
   
-  const getAllUsersPhones = `{
+  const getMessageData = `{
     allUsers {
       phone
+      firstName
+    }
+    Question(dateToAsk: "12/14") {
+      text
     }
   }`
   
   const errors = []
   const messages = []
   
-  request(GRAPHCOOL_SIMPLE_API_END_POINT, getAllUsersPhones)
+  request(GRAPHCOOL_SIMPLE_API_END_POINT, getMessageData)
     .then(data => {
       data.allUsers.forEach(user => {
         twilioClient.messages.create({
         	to: user.phone,
         	from: TWILIO_PHONE,
-        	body: 'Hello! Hope you’re having a good day!',
+        	body: `Hello, ${user.firstName}. ${data.Question.text}`,
         }, (err, message) => {
         	if (err) {
         		errors.push(err)
