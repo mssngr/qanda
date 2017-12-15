@@ -28,8 +28,7 @@
             "warn"
           ],
           "brace-style": [
-            "warn",
-            "stroustrup"
+            "warn"
           ],
           "class-methods-use-this": [
             "warn",
@@ -108,8 +107,14 @@
           ],
           "max-len": [
             "warn",
-            100,
-            2
+            {
+              "code": 100,
+              "tabWidth": 2,
+              "ignoreUrls": true,
+              "ignoreStrings": true,
+              "ignoreTemplateLiterals": true,
+              "ignoreRegExpLiterals": true
+            }
           ],
           "max-nested-callbacks": [
             "warn"
@@ -269,7 +274,10 @@
           ],
           "quotes": [
               "error",
-              "single"
+              "single",
+              {
+                "avoidEscape": true
+              }
           ],
           "require-await": [
             "error"
