@@ -46,5 +46,5 @@ export default (context, cb) => {
 		})
 
 	const anyErrors = (errors.length > 0) ? errors : null
-	cb(anyErrors, messages)
+	cb(anyErrors, `Sent ${messages.length} messages.`)
 }
