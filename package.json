@@ -6,7 +6,10 @@
   "license": "UNLICENSED",
   "dependencies": {
     "graphql-request": "^1.4.0",
-    "twilio": "^3.10.1"
+    "moment-timezone": "^0.5.14",
+    "phone": "^2.0.0-rc.1",
+    "twilio": "^3.10.1",
+    "zipcode-to-timezone": "^0.0.9"
   },
   "scripts": {
     "qandaSend12PM": "curl https://wt-dd03113a65a5e0837cf22a7238d97ffd-0.run.webtask.io/qandaSend12PM",

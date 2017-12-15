@@ -788,11 +788,17 @@ mkdirp@^0.5.1:
   dependencies:
     minimist "0.0.8"
 
+moment-timezone@^0.5.14:
+  version "0.5.14"
+  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.14.tgz#4eb38ff9538b80108ba467a458f3ed4268ccfcb1"
+  dependencies:
+    moment ">= 2.9.0"
+
 moment@2.18.1:
   version "2.18.1"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.18.1.tgz#c36193dd3ce1c2eed2adb7c802dbbc77a81b1c0f"
 
-moment@2.x.x:
+moment@2.x.x, "moment@>= 2.9.0":
   version "2.19.4"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.19.4.tgz#17e5e2c6ead8819c8ecfad83a0acccb312e94682"
 
@@ -865,6 +871,10 @@ path-is-inside@^1.0.1, path-is-inside@^1.0.2:
 performance-now@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/performance-now/-/performance-now-2.1.0.tgz#6309f4e0e5fa913ec1c69307ae364b4b377c9e7b"
+
+phone@^2.0.0-rc.1:
+  version "2.0.0-rc.1"
+  resolved "https://registry.yarnpkg.com/phone/-/phone-2.0.0-rc.1.tgz#52a5dc7df931230c146ab9a958fd21df9f70ab1b"
 
 pify@^2.0.0:
   version "2.3.0"
@@ -1228,3 +1238,7 @@ xtend@^4.0.1:
 yallist@^2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/yallist/-/yallist-2.1.2.tgz#1c11f9218f076089a47dd512f93c6699a6a81d52"
+
+zipcode-to-timezone@^0.0.9:
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/zipcode-to-timezone/-/zipcode-to-timezone-0.0.9.tgz#38e7f147b83392b944aca3566e0096e62793cb5d"
