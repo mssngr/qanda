@@ -78,6 +78,7 @@ const getQuestionByDate = date => (`{
 export default (context, cb) => {
 	const {data, secrets} = context
 	const body = data.Body.toLowerCase
+
 	const {
 		TWILIO_ACCT_SID,
 		TWILIO_AUTH_TOKEN,
@@ -90,11 +91,12 @@ export default (context, cb) => {
 	const twilioClient = new Twilio(TWILIO_ACCT_SID, TWILIO_AUTH_TOKEN)
 	const errors = []
 	const messages = []
-	const sendSMS = (messageBody, toNumber) => (
+
+	const sendSMS = (smsBody, toNumber) => (
 		twilioClient.messages.create({
 			to: toNumber || data.From,
 			from: TWILIO_PHONE,
-			body: messageBody,
+			body: smsBody,
 		}, (error, message) => {
 			if (error) {
 				errors.push(error)
