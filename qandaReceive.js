@@ -83,8 +83,10 @@ export default (context, cb) => {
 		TWILIO_AUTH_TOKEN,
 		TWILIO_PHONE,
 		GRAPHCOOL_SIMPLE_API_END_POINT,
+		WEBTASK_CONTAINER,
 	} = secrets
 
+	const wt = require('webtask-require')(WEBTASK_CONTAINER) // eslint-disable-line global-require
 	const twilioClient = new Twilio(TWILIO_ACCT_SID, TWILIO_AUTH_TOKEN)
 	const errors = []
 	const messages = []
