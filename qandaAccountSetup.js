@@ -74,7 +74,9 @@ export default (context, cb) => {
 
 	// Some tools to make the Graphcool requests less verbose
 	const rq = req => request(GRAPHCOOL_SIMPLE_API_END_POINT, req)
-	const rqThen = (req, then) => rq(req).then(then).catch(error => errors.push(error))
+	const rqThen = (req, then, then2) => (then2
+		? rq(req).then(then).then(then2).catch(error => errors.push(error))
+		: rq(req).then(then).catch(error => errors.push(error)))
 
 	// Some tools to make the Twilio messages less verbose
 	const twilioClient = new Twilio(TWILIO_ACCT_SID, TWILIO_AUTH_TOKEN)
@@ -99,7 +101,7 @@ export default (context, cb) => {
 		case 0: {
 			// Update their account and ask if we have their name down correctly.
 			rq(updateUserFirstName(User.id, userMessage))
-				.then(updatedUserData => sendSMS(`Nice to meet you, ${updatedUserData.User.firstName}. Did I spell your name correctly? (Reply "Yes" or "No")`))
+				.then(updatedUserData => sendSMS(`Nice to meet you, ${updatedUserData.User.firstName}. Did I spell your name correctly?\n(Reply "Yes" or "No")`))
 				.catch(error => errors.push(error))
 			break
 		}
@@ -111,7 +113,7 @@ export default (context, cb) => {
 			if (yes) {
 				rqThen(
 					updateAccountSetupStage(User.id, 2),
-					sendSMS(`Great! It looks like you're texting from the zipcode: ${userMessageData.FromZip}. That's important, because it tells me what timezone you're in (${User.timezone}.) Do I have the correct zipcode? (Reply "Yes" or "No")`)
+					sendSMS(`Great! It looks like you're texting from the zipcode: ${userMessageData.FromZip}. That's important, because it tells me what timezone you're in (${User.timezone}.) Do I have the correct zipcode?\n(Reply "Yes" or "No")`)
 				)
 			} else if (no) {
 				// If their name is not spelled correctly, move them backwards in
@@ -122,7 +124,7 @@ export default (context, cb) => {
 				)
 			} else {
 				// If we don't quite know how they responded, ask how we spelled their name, again.
-				sendSMS(`I didn't quite catch that last message. I have your name down as ${User.firstName}. Is that spelled correctly? (Reply "Yes" or "No")`)
+				sendSMS(`I didn't quite catch that last message. I have your name down as ${User.firstName}. Is that spelled correctly?\n(Reply "Yes" or "No")`)
 			}
 			break
 		}
@@ -133,7 +135,7 @@ export default (context, cb) => {
 			if (yes) {
 				rqThen(
 					updateAccountSetupStage(User.id, 3),
-					sendSMS('Great! Lastly, do you have a partner you want to share your answers with? (Reply "Yes" or "No)')
+					sendSMS('Great! Lastly, do you have a partner you want to share your answers with?\n(Reply "Yes" or "No")')
 				)
 			} else if (no) {
 				// If their zipcode is not correct, ask them what their current zipcode is.
@@ -142,7 +144,7 @@ export default (context, cb) => {
 				// If they provided a zipcode as their reply, update their account and confirm it's correct.
 				rqThen(
 					updateUserTimezone(User.id, zipcode),
-					sendSMS(`Wonderful. I have ${zipcode} as your zipcode, which means your timezone is ${getTimezoneByZipcode(zipcode)}. Is that correct? (Reply "Yes" or "No")`)
+					sendSMS(`Wonderful. I have ${zipcode} as your zipcode, which means your timezone is ${getTimezoneByZipcode(zipcode)}. Is that correct?\n(Reply "Yes" or "No")`)
 				)
 			} else {
 				// If we don't know how they replied, ask the question, again.
@@ -151,39 +153,45 @@ export default (context, cb) => {
 			break
 		}
 
-		/* PARTNER SETUP */
+		/* CONFIRMING PARTNER REQUEST */
 		case 3: {
 			// If they do want to set up a partner, ask for their partner's phone number.
 			if (yes) {
 				sendSMS("That's just what this app was made for! What is your partner's 10-digit phone number? (e.g. 999-999-9999)")
 			} else if (no) {
-				// If they don't want to set up a partner, move them along in the account setup stage
+				// If they don't want to set up a partner, skip them ahead in the account setup stage
 				// and let them know the app can work for singles, as well.
 				rqThen(
-					updateAccountSetupStage(User.id, 4),
-					sendSMS("That's ok. I'll save your answers just for you, and, as the years go by, you'll get to see how your answers differ over the years.")
+					updateAccountSetupStage(User.id, 5),
+					sendSMS(`That's ok. I'll save your answers just for you, and, as the years go by, you'll get to see how your answers differ.\n\nIf you ever want to change your settings, just text "Dashboard" to this number. Also, texting "Help" will give you a list of all the available commands. Anyways, let's get on to the fun stuff! I'll send you today's question.`), // eslint-disable-line quotes
+					null // filler, I'll want to send the daily question with this argument.
 				)
 			} else if (phoneNumber) {
 				// If they replied with a valid phone number,
-				// check to see if the phone number is tied to an account.
+				// update the account setup stage and confirm
+				// that's the number the User wants to partner with.
+				rqThen(
+					updateAccountSetupStage(User.id, 4),
+					sendSMS(`Ok, just confirming. You want to send a partnership request to ${phoneNumber}?`)
+				)
+			} else {
+				// If we don't know how they replied, ask the question, again.
+				sendSMS(`I'm sorry, I didn't quite catch that. Do you have a partner you want to share your answers with?\n(Reply "Yes" or "No")`) // eslint-disable-line quotes
+			}
+			break
+		}
+
+		case 4: {
+			// If they confirm the phone number, check to see if it's tied to an account.
+			if (yes) {
 				rq(getUserByPhone(phoneNumber))
 					.then(partnerData => {
 						const Partner = partnerData.User
-						// If so, go ahead and set up the relation between the two Users.
+						// If so, send the potential Partner a message
+						// and let the User know the partnership is pending.
 						if (Partner) {
-							request(GRAPHCOOL_SIMPLE_API_END_POINT, setPartner(User.id, Partner.id))
-								// Then move them along the account setup stage.
-								.then(() => {
-									request(
-										GRAPHCOOL_SIMPLE_API_END_POINT,
-										moveAccountSetupStageForward(User.id, User.accountSetupStage)
-									)
-										// Then, finally, send them a message about the success, and ask today's question.
-										.then(() => {
-
-										})
-								})
-								.catch(error => errors.push(error))
+							sendSMS(``)
+							sendSMS(`${User.firstName}, I sent a request to that phone number. In the meantime, I'll send you today's question.`)
 						} else {
 							// If the phone number is not tied to an account, send the potential partner
 							// an invite to the service and move the account set up along.
@@ -197,14 +205,11 @@ export default (context, cb) => {
 						}
 					})
 					.catch(error => errors.push(error))
-			} else {
-				// If we don't know how they replied, ask the question, again.
-				sendSMS("I'm sorry, I didn't quite catch that. Do you have a partner you want to share your answers with? (Reply \"Yes\" or \"No\")")
 			}
 			break
 		}
 
-		case 3: {
+		case 5: {
 			// Check how they replied to the last message.
 			const phoneNumber = phone(userMessage)
 			// If they replied with a valid phone number,
