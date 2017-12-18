@@ -159,12 +159,12 @@ export default (context, cb) => {
 			if (yes) {
 				sendSMS("That's just what this app was made for! What is your partner's 10-digit phone number? (e.g. 999-999-9999)")
 			} else if (no) {
-				// If they don't want to set up a partner, skip them ahead in the account setup stage
+				// If they don't want to set up a partner, skip them to the end of the account setup stage
 				// and let them know the app can work for singles, as well.
 				rqThen(
 					updateAccountSetupStage(User.id, 5),
 					sendSMS(`That's ok. I'll save your answers just for you, and, as the years go by, you'll get to see how your answers differ.\n\nIf you ever want to change your settings, just text "Dashboard" to this number. Also, texting "Help" will give you a list of all the available commands. Anyways, let's get on to the fun stuff! I'll send you today's question.`), // eslint-disable-line quotes
-					null // filler, I'll want to send the daily question with this argument.
+					null // filler, I'll want to send the daily question with this line.
 				)
 			} else if (phoneNumber) {
 				// If they replied with a valid phone number,
@@ -181,75 +181,47 @@ export default (context, cb) => {
 			break
 		}
 
+		/* SENDING PARTNERSHIP REQUEST */
 		case 4: {
 			// If they confirm the phone number, check to see if it's tied to an account.
 			if (yes) {
 				rq(getUserByPhone(phoneNumber))
 					.then(partnerData => {
 						const Partner = partnerData.User
-						// If so, send the potential Partner a message
-						// and let the User know the partnership is pending.
+						// If so, send the potential Partner a message.
 						if (Partner) {
-							sendSMS(``)
-							sendSMS(`${User.firstName}, I sent a request to that phone number. In the meantime, I'll send you today's question.`)
+							sendSMS(`${Partner.firstName}, you have a request from ${User.firstName} (${User.phone}) to be Q&A partners! This means you will be able to see each other's answers to the daily questions. Also, you'll be able to see answers from years past. Would you like me to set up the connection?\n(Reply "Accept" or "Decline")`, Partner.phone)
 						} else {
-							// If the phone number is not tied to an account, send the potential partner
-							// an invite to the service and move the account set up along.
-							request(
-								GRAPHCOOL_SIMPLE_API_END_POINT,
-								moveAccountSetupStageForward(User.id, User.accountSetupStage)
-							)
-								.then(() => sendSMS(`${phoneNumber[0]} isn't tied to a user, yet. I sent them an invite to join. In the meantime, go ahead and answer today's question!`))
-								.then(() => sendSMSElsewhere(phoneNumber[0], ''))
-								.catch(error => errors.push(error))
+							// If the phone number is not tied to an account,
+							// send the potential partner an invite to the service.
+							sendSMS(`Hello! ${User.firstName} sent you an invite to be their partner in a simple SMS app called "Q&A." Q&A sends you daily questions and, when you answer them, sends your answers to your partner (and vice versa.) It's a fun way to get to know each other better. Would you like me to set up an account for you?\n(Reply "Yes" or "No")`)
 						}
+						// Finally, move the User to the end of the account setup stage
+						// then let them know the partnership is pending.
+						rqThen(
+							updateAccountSetupStage(User.id, 5),
+							sendSMS(`${User.firstName}, I sent a partnership request to that phone number. Once your partner accepts your request, you both will be able to see each others' answers to the daily questions. And, as time goes by, you'll both be reminded of answers from years past.\n\nIf you ever want to change your settings, just text "Dashboard" to this number. Also, texting "Help" will give you a list of all the available commands. Anyways, let's get on to the fun stuff! I'll send you today's question.`)
+						)
 					})
+					// Also, send the User today's question.
+					.then(() => null) // filler, I'll want to send the daily question with this line.
 					.catch(error => errors.push(error))
 			}
 			break
 		}
 
-		case 5: {
-			// Check how they replied to the last message.
-			const phoneNumber = phone(userMessage)
-			// If they replied with a valid phone number,
-			if (phoneNumber.length > 0) {
-				// Check to see if the phone number is tied to an account.
-				request(GRAPHCOOL_SIMPLE_API_END_POINT, getUserByPhone(phoneNumber[0]))
-					.then(moreServerData => {
-						const Partner = moreServerData.User
-						// If so, go ahead and set up the connection between the two Users.
-						if (Partner) {
-							setPartner(User.id, Partner.id)
-						} else {
-							// If the phone number is not tied to an account, send the potential partner
-							// an invite to the service and move the account set up along.
-							request(
-								GRAPHCOOL_SIMPLE_API_END_POINT,
-								moveAccountSetupStageForward(User.id, User.accountSetupStage)
-							)
-								.then(() => sendSMS(`${phoneNumber[0]} isn't tied to a user, yet. I sent them an invite to join. In the meantime, go ahead and answer today's question!`))
-								.then(() => sendSMSElsewhere(phoneNumber[0], ''))
-								.catch(error => errors.push(error))
-						}
-					})
-			}
-			break
-		}
-
 		default: {
-			twilioClient.messages.create({
-				to: data.From,
-				from: TWILIO_PHONE,
-				body: "Welcome to Q&A, where you and your partners' answers to daily questions are texted to each other and saved for posterity. Tell me, what's your first name?",
-			}, (error, message) => {
-				if (error) {
-					errors.push(error)
-				} else {
-					messages.push(message)
-				}
-			})
+			errors.push('Account setup stage is incorrect.')
+			sendSMS(`I'm sorry, ${User.firstName}. It looks like there's something wrong with your account. Please contact gabriel@ecliptic.io to correct this, letting them know your "account setup stage" is not saved correctly.`)
 			break
 		}
+	}
+
+	// Check for errors and send any with the callback.
+	if (errors.length > 0) {
+		cb(errors.toString)
+	// If there's none, send the messages with the callback.
+	} else {
+		cb(null, messages.toString)
 	}
 }
