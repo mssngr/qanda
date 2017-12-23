@@ -12,13 +12,15 @@ const getUserByPhone = phoneNum => (`{
 		id
 		firstName
 		partner
+		requestMade
+		requestReceived
 		timezone
 	}
 }`)
 
 const updateAccountSetupStage = (id, newStage) => (`{
 	updateUser(
-		id: "${id}"
+		id: ${id}
 		accountSetupStage: ${newStage}
 	) {
 		id
@@ -27,8 +29,8 @@ const updateAccountSetupStage = (id, newStage) => (`{
 
 const updateUserFirstName = (id, firstName) => (`{
 	updateUser(
-		id: "${id}"
-		firstName: "${firstName}"
+		id: ${id}
+		firstName: ${firstName}
 		accountSetupStage: 1
 	) {
 		firstName
@@ -37,9 +39,33 @@ const updateUserFirstName = (id, firstName) => (`{
 
 const updateUserTimezone = (id, zipcode) => (`{
 	updateUser(
-		id: "${id}"
+		id: ${id}
 		timezone: "${getTimezoneByZipcode(zipcode)}"
 	) {
+		id
+	}
+}`)
+
+const createPartnership = (PartnershipRequest) => (`{
+	setParter(
+		partner1UserId: ${PartnershipRequest.requestee.id}
+		partner2UserId: ${PartnershipRequest.requester.id}
+	) {
+		id
+	}
+}`)
+
+const createPartnershipRequest = (requesterId, requesteeId) => (`{
+	createPartnershipRequeset(
+		requesterId: ${requesterId}
+		requesteeId: ${requesteeId}
+	) {
+		id
+	}
+}`)
+
+const deletePartnershipRequest = (partnershipRequestId) => (`{
+	deletePartnershipRequest(id: ${partnershipRequestId}) {
 		id
 	}
 }`)
@@ -74,9 +100,11 @@ export default (context, cb) => {
 
 	// Some tools to make the Graphcool requests less verbose
 	const rq = req => request(GRAPHCOOL_SIMPLE_API_END_POINT, req)
-	const rqThen = (req, then, then2) => (then2
-		? rq(req).then(then).then(then2).catch(error => errors.push(error))
-		: rq(req).then(then).catch(error => errors.push(error)))
+	const rqThen = (req, then, then2, then3) => {
+		if (then3) return rq(req).then(then).then(then2).then(then3).catch(error => errors.push(error))
+		if (then2) return rq(req).then(then).then(then2).catch(error => errors.push(error))
+		return rq(req).then(then).catch(error => errors.push(error))
+	}
 
 	// Some tools to make the Twilio messages less verbose
 	const twilioClient = new Twilio(TWILIO_ACCT_SID, TWILIO_AUTH_TOKEN)
@@ -188,31 +216,118 @@ export default (context, cb) => {
 				rq(getUserByPhone(phoneNumber))
 					.then(partnerData => {
 						const Partner = partnerData.User
-						// If so, send the potential Partner a message.
+
+						// THERE IS A USER
 						if (Partner) {
-							sendSMS(`${Partner.firstName}, you have a request from ${User.firstName} (${User.phone}) to be Q&A partners! This means you will be able to see each other's answers to the daily questions. Also, you'll be able to see answers from years past. Would you like me to set up the connection?\n(Reply "Accept" or "Decline")`, Partner.phone)
+							const {partner, requestMade, requestReceived} = Partner
+							// If so, see if that potential Partner already has a partner or a partnership request
+							if (partner || requestMade || requestReceived) {
+
+								// POTENTIAL PARTNERSHIP EXISTS
+								// If they do have a partnership set up or in process,
+								// check to see if it is with the User
+								if (partner && partner.id === User.id) {
+
+									// POTENTIAL PARTNER IS PARTNERS WITH USER
+									// If the two users already have a partnership, let the new User know
+									// and move the User to the end of the account setup stage
+									rqThen(
+										updateAccountSetupStage(User.id, 5),
+										sendSMS(`Hey ${User.firstName}, it looks like you already have a partnership set up with ${Partner.firstName}! That means you both will be able to see each others' answers to the daily questions. And, as time goes by, you'll both be reminded of answers from years past.\n\nIf you ever want to change your settings, just text "Dashboard" to this number. Also, texting "Help" will give you a list of all the available commands. Anyways, let's get on to the fun stuff! I'll send you today's question.`)
+									)
+								} else if (requestMade && requestMade.requestee.id === User.id) {
+
+									// POTENTIAL PARTNER MADE PARTNERSHIP REQUEST TO USER
+									// If the potential partner already requested partnership with the User,
+									// cement the partneship
+									rqThen(
+										createPartnership(requestMade),
+										deletePartnershipRequest(requestMade.id),
+										updateAccountSetupStage(User.id, 5),
+										sendSMS(`I was able to set up the partnership with ${Partner.firstName}! That means you both will be able to see each others' answers to the daily questions. And, as time goes by, you'll both be reminded of answers from years past.\n\nIf you ever want to change your settings, just text "Dashboard" to this number. Also, texting "Help" will give you a list of all the available commands. Anyways, let's get on to the fun stuff! I'll send you today's question.`)
+									)
+								} else if (requestReceived && requestReceived.requester.id === User.id) {
+
+									// POTENTIAL PARTNER RECEIVED PARTNERSHIP REQUEST FROM USER
+									// If the potential partner already has received a request for partnership
+									// from the user, let the User know it is still pending
+									// and finish their account set up
+									rqThen(
+										updateAccountSetupStage(User.id, 5),
+										sendSMS(`${User.firstName}, it looks like you already sent a request to that number. Once your partner accepts your request, you both will be able to see each others' answers to the daily questions. And, as time goes by, you'll both be reminded of answers from years past.\n\nIf you ever want to change your settings, just text "Dashboard" to this number. Also, texting "Help" will give you a list of all the available commands. Anyways, let's get on to the fun stuff! I'll send you today's question.`)
+									)
+								} else {
+
+									// POTENTIAL PARTNER HAS EXISTING PARTNERSHIP OR PARTNERSHIP REQUEST
+									// TO SOMEONE ELSE
+									// If the potential partner has an existing partnership
+									// or a pending partnership request with someone else,
+									// notify the potential Partner and User,
+									// and finish the User's account setup
+									sendSMS(
+										`Hello, it looks like ${User.firstName} tried to request a Q&A partnership with you, but it seems you already have either an existing partner or an existing partnership request pending. Contact gabriel@ecliptic.io if this is a mistake.`,
+										Partner.phone
+									)
+									rqThen(
+										updateAccountSetupStage(User.id, 5),
+										sendSMS(`I'm sorry, ${User.firstName}, I'm unable to process the partner request. Contact the person you're trying to connect with to see if they have their account set up to receive a partner.`)
+									)
+								}
+							} else {
+
+								// NO PARTNERSHIPS EXIST WITH POTENTIAL PARTNER
+								// If the potential partner has no existing partnership ties,
+								// set up the request for partnership between the two users,
+								// notify both users, and move the User along account setup
+								rqThen(
+									createPartnershipRequest(User.id, Partner.id),
+									sendSMS(
+										`${Partner.firstName}, you have a request from ${User.firstName} (${User.phone}) to be Q&A partners! This means you will be able to see each other's answers to the daily questions. Also, you'll be able to see answers from years past. Would you like me to set up the connection?\n(Reply "Accept" or "Decline")`,
+										Partner.phone
+									)
+								)
+								rqThen(
+									updateAccountSetupStage(User.id, 5),
+									sendSMS(`${User.firstName}, I sent a partnership request to that phone number. Once your partner accepts your request, you both will be able to see each others' answers to the daily questions. And, as time goes by, you'll both be reminded of answers from years past.\n\nIf you ever want to change your settings, just text "Dashboard" to this number. Also, texting "Help" will give you a list of all the available commands. Anyways, let's get on to the fun stuff! I'll send you today's question.`)
+								)
+							}
 						} else {
+
+							// NO ACCOUNT EXISTS WITH PHONE NUMBER
 							// If the phone number is not tied to an account,
-							// send the potential partner an invite to the service.
-							sendSMS(`Hello! ${User.firstName} sent you an invite to be their partner in a simple SMS app called "Q&A." Q&A sends you daily questions and, when you answer them, sends your answers to your partner (and vice versa.) It's a fun way to get to know each other better. Would you like me to set up an account for you?\n(Reply "Yes" or "No")`)
+							// send the potential partner an invite to the service
+							// and finish the User's account setup
+							/* NEED TO FIGURE OUT HOW TO CREATE REQUEST WITHOUT ACCOUNT */
+							sendSMS(
+								`Hello! ${User.firstName} sent you an invite to be their partner in a simple SMS app called "Q&A." Q&A sends you daily questions and, when you answer them, sends your answers to your partner (and vice versa.) It's a fun way to get to know each other better. Would you like me to set up an account for you?\n(Reply "Create account")`,
+								phoneNumber
+							)
+							rqThen(
+								updateAccountSetupStage(User.id, 5),
+								sendSMS(`${User.firstName}, I sent a partnership request to that phone number. Once your partner accepts your request, you both will be able to see each others' answers to the daily questions. And, as time goes by, you'll both be reminded of answers from years past.\n\nIf you ever want to change your settings, just text "Dashboard" to this number. Also, texting "Help" will give you a list of all the available commands. Anyways, let's get on to the fun stuff! I'll send you today's question.`)
+							)
 						}
-						// Finally, move the User to the end of the account setup stage
-						// then let them know the partnership is pending.
-						rqThen(
-							updateAccountSetupStage(User.id, 5),
-							sendSMS(`${User.firstName}, I sent a partnership request to that phone number. Once your partner accepts your request, you both will be able to see each others' answers to the daily questions. And, as time goes by, you'll both be reminded of answers from years past.\n\nIf you ever want to change your settings, just text "Dashboard" to this number. Also, texting "Help" will give you a list of all the available commands. Anyways, let's get on to the fun stuff! I'll send you today's question.`)
-						)
 					})
 					// Also, send the User today's question.
 					.then(() => null) // filler, I'll want to send the daily question with this line.
 					.catch(error => errors.push(error))
+			} else if (no) {
+				// If they do not confirm the number, put them back to the previous stage
+				// and ask if they want to do a partnership request, at all.
+				rqThen(
+					updateAccountSetupStage(User.id, 3),
+					sendSMS('Oh, ok! Did you still want to set up a partnership request with someone?\n(Reply "Yes" or "No")')
+				)
+			} else {
+				// If we don't know what they said, ask again.
+				sendSMS(`Sorry, didn't quite catch that. Just confirming: you want to send a partnership request to ${phoneNumber}?`)
 			}
 			break
 		}
 
 		default: {
 			errors.push('Account setup stage is incorrect.')
-			sendSMS(`I'm sorry, ${User.firstName}. It looks like there's something wrong with your account. Please contact gabriel@ecliptic.io to correct this, letting them know your "account setup stage" is not saved correctly.`)
+			sendSMS(`I'm sorry, ${User.firstName}. It looks like there's something wrong with your account. 🙁 Please contact gabriel@ecliptic.io, letting him know your "account setup stage" is not saved correctly.`)
 			break
 		}
 	}
