@@ -298,6 +298,7 @@ export default (context, cb) => {
 							// send the potential partner an invite to the service
 							// and finish the User's account setup
 							/* NEED TO FIGURE OUT HOW TO CREATE REQUEST WITHOUT ACCOUNT */
+							'Finish this Section'
 							sendSMS(
 								`Hello! ${User.firstName} sent you an invite to be their partner in a simple SMS app called "Q&A." Q&A sends you daily questions and, when you answer them, sends your answers to your partner (and vice versa.) It's a fun way to get to know each other better. Would you like me to set up an account for you?\n(Reply "Create account")`,
 								phoneNumber
@@ -309,6 +310,7 @@ export default (context, cb) => {
 						}
 					})
 					// Also, send the User today's question.
+					'Finish this Section'
 					.then(() => null) // filler, I'll want to send the daily question with this line.
 					.catch(error => errors.push(error))
 			} else if (no) {
