@@ -215,7 +215,7 @@ export default (context, cb) => {
 			}
 		})
 		.catch(error => {
-			errors.push(error)})
+			errors.push(error))
 			// Check for errors and send any with the callback.
 			if (errors.length > 0) {
 				cb(errors.toString)
