@@ -208,20 +208,20 @@ export default (context, cb) => {
 
 			// Check for errors and send any with the callback.
 			if (errors.length > 0) {
-				cb(errors.toString)
+				cb(errors.toString())
 			// If there's none, send the messages with the callback.
 			} else {
-				cb(null, messages.toString)
+				cb(null, messages.toString())
 			}
 		})
 		.catch(error => {
 			errors.push(error)
 			// Check for errors and send any with the callback.
 			if (errors.length > 0) {
-				cb(errors.toString)
+				cb(errors.toString())
 			// If there's none, send the messages with the callback.
 			} else {
-				cb(null, messages.toString)
+				cb(null, messages.toString())
 			}
 		})
 }
