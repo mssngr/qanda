@@ -147,7 +147,7 @@ export default (context, cb) => {
 				id
 			}
 		}
-	`).then(result => sendSMS(result))
+	`).then(result => sendSMS(result)).catch(error => sendSMS(error))
 
 	/* HANDLE RECEIVED MESSAGE */
 	rq(getUserByPhone(data.From))
