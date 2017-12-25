@@ -148,7 +148,7 @@ export default (context, cb) => {
 				// the account setup stage and ask their name again.
 				rqThen(
 					updateAccountSetupStage(User.id, 0),
-					sendSMS('My apologies. How do you spell that, again?')
+					sendSMS(`My apologies. How do you spell that, again?`)
 				)
 			} else {
 				// If we don't quite know how they responded, ask how we spelled their name, again.
@@ -163,11 +163,11 @@ export default (context, cb) => {
 			if (yes) {
 				rqThen(
 					updateAccountSetupStage(User.id, 3),
-					sendSMS('Great! Lastly, do you have a partner you want to share your answers with?\n(Reply "Yes" or "No")')
+					sendSMS(`Great! Lastly, do you have a partner you want to share your answers with?\n(Reply "Yes" or "No")`)
 				)
 			} else if (no) {
 				// If their zipcode is not correct, ask them what their current zipcode is.
-				sendSMS('Ok. What is your current, 5-digit zipcode, then?')
+				sendSMS(`Ok. What is your current, 5-digit zipcode, then?`)
 			} else if (zipcode) {
 				// If they provided a zipcode as their reply, update their account and confirm it's correct.
 				rqThen(
@@ -176,7 +176,7 @@ export default (context, cb) => {
 				)
 			} else {
 				// If we don't know how they replied, ask the question, again.
-				sendSMS("I'm sorry, I didn't quite catch that. What's your current, 5-digit zipcode?")
+				sendSMS(`I'm sorry, I didn't quite catch that. What's your current, 5-digit zipcode?`)
 			}
 			break
 		}
@@ -185,7 +185,7 @@ export default (context, cb) => {
 		case 3: {
 			// If they do want to set up a partner, ask for their partner's phone number.
 			if (yes) {
-				sendSMS("That's just what this app was made for! What is your partner's 10-digit phone number? (e.g. 999-999-9999)")
+				sendSMS(`That's just what this app was made for! What is your partner's 10-digit phone number? (e.g. 999-999-9999)`)
 			} else if (no) {
 				// If they don't want to set up a partner, skip them to the end of the account setup stage
 				// and let them know the app can work for singles, as well.
@@ -318,7 +318,7 @@ export default (context, cb) => {
 				// and ask if they want to do a partnership request, at all.
 				rqThen(
 					updateAccountSetupStage(User.id, 3),
-					sendSMS('Oh, ok! Did you still want to set up a partnership request with someone?\n(Reply "Yes" or "No")')
+					sendSMS(`Oh, ok! Did you still want to set up a partnership request with someone?\n(Reply "Yes" or "No")`)
 				)
 			} else {
 				// If we don't know what they said, ask again.

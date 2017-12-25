@@ -104,6 +104,7 @@ export default (context, cb) => {
 	/* TOOLS */
 	// Make the Graphcool requests less verbose
 	const rq = req => request(GRAPHCOOL_SIMPLE_API_END_POINT, req)
+	const rqCatch = req => rq(req).catch(error => errors.push(error))
 	const rqThen = (req, then, then2, then3) => {
 		if (then3) return rq(req).then(then).then(then2).then(then3).catch(error => errors.push(error))
 		if (then2) return rq(req).then(then).then(then2).catch(error => errors.push(error))
@@ -130,9 +131,6 @@ export default (context, cb) => {
 		})
 	)
 
-	sendSMS('test back at you')
-	console.log('qandaReceive initiated')
-	console.log(rq(getUserByPhone(data.From)))
 	/* HANDLE RECEIVED MESSAGE */
 	rq(getUserByPhone(data.From))
 		.then(userData => {
@@ -141,7 +139,6 @@ export default (context, cb) => {
 
 			// If there is a User connected to the phone number...
 			if (User) {
-				console.log('if User')
 
 				/* ACCOUNT SETUP */
 				// Check if they've completed the account set up.
@@ -157,14 +154,20 @@ export default (context, cb) => {
 
 				/* ACCOUNT CREATION */
 				// If there's not a User connected to the phone number,
-				// let's see if they answered "yes" to setting up an account
+				// and they answered "yes" to setting up an account,
+				// create one for them
+				rqThen(
+					createUser(data.From, data.FromZip),
+					sendSMS(`Fantastic! What's your first name?`)
+				)
+				// The created "User" has a default "accountSetupStage" of 0,
+				// So, when they reply, they will be routed to "qandaAccountSetup"
 			} else if (no) {
 				// If they answered "no" to setting up an account, thank them for their time
 			} else {
-				console.log('no User')
-				// Otherwise, act like this is the first time they've ever messaged;
-				// ask them if they want to create an account
-				sendSMS('Would you like to create an account?\n(Reply "Yes" or "No")')
+				// Otherwise, act like this is the first time they've ever messaged
+				// and ask them if they want to create an account
+				sendSMS(`Welcome to Q&A, a simple SMS app that asks you daily questions and sends your answers to your partner. Q&A also saves your answers, year after year, so you can see how your answers have changed over time.\n\nWould you like me to create an account for you?\n(Reply "Yes" or "No")`)
 			}
 
 			// request(GRAPHCOOL_SIMPLE_API_END_POINT, createUser(data.From, data.FromZip))
