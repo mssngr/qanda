@@ -11,7 +11,9 @@ const getUserByPhone = phoneNum => (`{
 	User(phone: "${phoneNum}") {
 		id
 		firstName
-		partner
+		partner {
+			id
+		}
 		timezone
 	}
 }`)
