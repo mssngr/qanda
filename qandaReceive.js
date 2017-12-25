@@ -150,13 +150,16 @@ export default (context, cb) => {
 				// const today = `${currentDate.month() + 1}/${currentDate.date()}`
 				// request(GRAPHCOOL_SIMPLE_API_END_POINT, getQuestionByDate(today))
 			} else if (yes) {
+				console.log(data.From, getTimezoneByZipcode(data.FromZip))
 
 				/* ACCOUNT CREATION */
 				// If there's not a User connected to the phone number,
 				// and they answered "yes" to setting up an account,
 				// create one for them
-				rq(createUser(data.From, data.FromZip))
-					.then(result => console.log(result))
+				rqThen(
+					createUser(data.From, data.FromZip),
+					sendSMS(`Fantastic! What's your first name?`)
+				)
 				// The created "User" has a default "accountSetupStage" of 0,
 				// So, when they reply, they will be routed to "qandaAccountSetup"
 			} else if (no) {
