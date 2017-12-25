@@ -3,10 +3,11 @@ import Twilio from 'twilio'
 import moment from 'moment-timezone'
 import zipcodeToTimezone from 'zipcode-to-timezone'
 import phone from 'phone'
-import {request} from 'graphql-request'
+import {GraphQLClient} from 'graphql-request'
 
 const getTimezoneByZipcode = zipcode => zipcodeToTimezone.lookup(zipcode)
 
+/* GRAPHQL REQUESTS */
 const getUserByPhone = phoneNum => (`{
 	User(phone: "${phoneNum}") {
 		id
@@ -77,6 +78,7 @@ const getQuestionByDate = date => (`{
 	}
 }`)
 
+/* MODULE BODY */
 export default (context, cb) => {
 	const {data, secrets} = context
 
@@ -94,6 +96,7 @@ export default (context, cb) => {
 		TWILIO_AUTH_TOKEN,
 		TWILIO_PHONE,
 		GRAPHCOOL_SIMPLE_API_END_POINT,
+		GRAPHCOOL_WEBTASK_AUTH_TOKEN,
 		WEBTASK_CONTAINER,
 	} = secrets
 
@@ -103,7 +106,12 @@ export default (context, cb) => {
 
 	/* TOOLS */
 	// Make the Graphcool requests less verbose
-	const rq = req => request(GRAPHCOOL_SIMPLE_API_END_POINT, req)
+	const graphQLClient = new GraphQLClient(GRAPHCOOL_SIMPLE_API_END_POINT, {
+		headers: {
+			Authorization: `Bearer ${GRAPHCOOL_WEBTASK_AUTH_TOKEN}`,
+		},
+	})
+	const rq = req => graphQLClient.request(req)
 	const rqCatch = req => rq(req).catch(error => errors.push(error))
 	const rqThen = (req, then, then2, then3) => {
 		if (then3) return rq(req).then(then).then(then2).then(then3).catch(error => errors.push(error))
