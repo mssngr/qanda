@@ -80,7 +80,7 @@ export default (context, cb) => {
 	const userMessageLC = userMessage.toLowerCase
 	const userMessageDigits = userMessage.replace(/^\D+/g, '')
 
-	// Checks for common replies in the User's message
+	// Check for common replies in the User's message
 	const yes = userMessageLC.includes('yes') || userMessageLC === 'y'
 	const no = userMessageLC.includes('no') || userMessageLC === 'n'
 	const zipcode = getTimezoneByZipcode(userMessageDigits) && userMessageDigits
