@@ -138,16 +138,6 @@ export default (context, cb) => {
 			}
 		})
 	)
-	graphQLClient.request(`
-		{
-			createUser(
-				phone: "1"
-				timezone: "${getTimezoneByZipcode(76210)}"
-			) {
-				id
-			}
-		}
-	`).then(result => sendSMS(result)).catch(error => sendSMS(error))
 
 	/* HANDLE RECEIVED MESSAGE */
 	rq(getUserByPhone(data.From))
@@ -173,10 +163,25 @@ export default (context, cb) => {
 				// If there's not a User connected to the phone number,
 				// and they answered "yes" to setting up an account,
 				// create one for them
-				rqThen(
-					createUser(data.From, data.FromZip),
-					sendSMS(`Fantastic! What's your first name?`)
-				)
+				rq(createUser(data.From, data.FromZip))
+					.then(result => {
+						sendSMS(`Fantastic! What's your first name?`)
+						if (errors.length > 0) {
+							cb(errors.toString())
+						// If there's none, send the messages with the callback.
+						} else {
+							cb(null, result)
+						}
+					})
+					.catch(error => {
+						errors.push(error)
+						if (errors.length > 0) {
+							cb(errors.toString())
+						// If there's none, send the messages with the callback.
+						} else {
+							cb(null, messages.toString())
+						}
+					})
 				// The created "User" has a default "accountSetupStage" of 0,
 				// So, when they reply, they will be routed to "qandaAccountSetup"
 			} else if (no) {
