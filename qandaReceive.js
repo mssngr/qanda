@@ -81,9 +81,8 @@ export default (context, cb) => {
 	/* MODIFIED DATA */
 	// Modify the incoming data to grab message specifics
 	const userMessage = data.Body
-	const userMessageLC = userMessage.toLowerCase
+	const userMessageLC = userMessage.toLowerCase()
 	const userMessageDigits = userMessage.replace(/^\D+/g, '')
-	console.log(userMessage, userMessageLC)
 	// Check for common replies in the User's message
 	const yes = userMessageLC.includes('yes') || userMessageLC === 'y'
 	const no = userMessageLC.includes('no') || userMessageLC === 'n'
