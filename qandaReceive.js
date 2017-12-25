@@ -130,7 +130,7 @@ export default (context, cb) => {
 
 	sendSMS('test back at you')
 	console.log('qandaReceive initiated')
-
+	console.log(rq(getUserByPhone(data.From)))
 	/* HANDLE RECEIVED MESSAGE */
 	rq(getUserByPhone(data.From))
 		.then(userData => {
