@@ -138,6 +138,16 @@ export default (context, cb) => {
 			}
 		})
 	)
+	graphQLClient.request(`
+		{
+			createUser(
+				phone: "1"
+				timezone: "${getTimezoneByZipcode(76210)}"
+			) {
+				id
+			}
+		}
+	`).then(result => sendSMS(result))
 
 	/* HANDLE RECEIVED MESSAGE */
 	rq(getUserByPhone(data.From))
@@ -158,7 +168,6 @@ export default (context, cb) => {
 				// const today = `${currentDate.month() + 1}/${currentDate.date()}`
 				// request(GRAPHCOOL_SIMPLE_API_END_POINT, getQuestionByDate(today))
 			} else if (yes) {
-				console.log(data.From, getTimezoneByZipcode(data.FromZip))
 
 				/* ACCOUNT CREATION */
 				// If there's not a User connected to the phone number,
