@@ -155,9 +155,8 @@ export default (context, cb) => {
 				// If there's not a User connected to the phone number,
 				// and they answered "yes" to setting up an account,
 				// create one for them
-				rq(createUser(data.From, data.FromZip)
+				rq(createUser(data.From, data.FromZip))
 					.then(result => console.log(result))
-				)
 				// The created "User" has a default "accountSetupStage" of 0,
 				// So, when they reply, they will be routed to "qandaAccountSetup"
 			} else if (no) {
