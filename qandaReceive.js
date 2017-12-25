@@ -82,7 +82,6 @@ export default (context, cb) => {
 	// Modify the incoming data to grab message specifics
 	const userMessage = data.Body
 	const userMessageLC = userMessage.toLowerCase()
-	const userMessageDigits = userMessage.replace(/^\D+/g, '')
 	// Check for common replies in the User's message
 	const yes = userMessageLC.includes('yes') || userMessageLC === 'y'
 	const no = userMessageLC.includes('no') || userMessageLC === 'n'
@@ -109,7 +108,7 @@ export default (context, cb) => {
 		return rq(req).then(then).catch(error => errors.push(error))
 	}
 	// Make the Webtask requests less verbose
-	const wt = require('webtask-require')(WEBTASK_CONTAINER); // eslint-disable-line global-require
+	const wt = require('webtask-require')(WEBTASK_CONTAINER) // eslint-disable-line global-require
 	const startWebtask = (taskName, taskData) => wt(taskName, taskData)
 		.then(result => messages.push(result))
 		.catch(error => errors.push(error))
@@ -200,13 +199,13 @@ export default (context, cb) => {
 			// 		// ask them about the pending partner, again.
 			// 	}
 			// }
-
-			// Check for errors and send any with the callback.
-			if (errors.length > 0) {
-				cb(errors.toString)
-			// If there's none, send the messages with the callback.
-			} else {
-				cb(null, messages.toString)
-			}
 		})
+		.catch(error => errors.push(error))
+		// Check for errors and send any with the callback.
+	if (errors.length > 0) {
+		cb(errors.toString)
+	// If there's none, send the messages with the callback.
+	} else {
+		cb(null, messages.toString)
+	}
 }
