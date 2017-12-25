@@ -129,15 +129,17 @@ export default (context, cb) => {
 	)
 
 	sendSMS('test back at you')
-	console.log('fired')
+	console.log('qandaReceive initiated')
 
 	/* HANDLE RECEIVED MESSAGE */
 	rq(getUserByPhone(data.From))
 		.then(userData => {
+			console.log('.then')
 			const {User} = userData
 
 			// If there is a User connected to the phone number...
 			if (User) {
+				console.log('if User')
 
 				/* ACCOUNT SETUP */
 				// Check if they've completed the account set up.
@@ -157,6 +159,7 @@ export default (context, cb) => {
 			} else if (no) {
 				// If they answered "no" to setting up an account, thank them for their time
 			} else {
+				console.log('no User')
 				// Otherwise, act like this is the first time they've ever messaged;
 				// ask them if they want to create an account
 				sendSMS('Would you like to create an account?\n(Reply "Yes" or "No")')
