@@ -134,7 +134,6 @@ export default (context, cb) => {
 	/* HANDLE RECEIVED MESSAGE */
 	rq(getUserByPhone(data.From))
 		.then(userData => {
-			console.log('.then')
 			const {User} = userData
 
 			// If there is a User connected to the phone number...
@@ -156,9 +155,8 @@ export default (context, cb) => {
 				// If there's not a User connected to the phone number,
 				// and they answered "yes" to setting up an account,
 				// create one for them
-				rqThen(
-					createUser(data.From, data.FromZip),
-					sendSMS(`Fantastic! What's your first name?`)
+				rq(createUser(data.From, data.FromZip)
+					.then(result => console.log(result))
 				)
 				// The created "User" has a default "accountSetupStage" of 0,
 				// So, when they reply, they will be routed to "qandaAccountSetup"
