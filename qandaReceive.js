@@ -92,7 +92,7 @@ export default (context, cb) => {
 		return rq(req).then(then).catch(error => errors.push(error))
 	}
 	// Make the Webtask requests less verbose
-	const wt = require('webtask-require')('wt-dd03113a65a5e0837cf22a7238d97ffd-0') // eslint-disable-line global-require
+	const wt = require('webtask-require')(WEBTASK_CONTAINER) // eslint-disable-line global-require
 	const startWebtask = (taskName, taskData) => wt(taskName, taskData)
 		.then(result => messages.push(result))
 		.catch(error => errors.push(error))
