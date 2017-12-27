@@ -108,14 +108,17 @@ export default (context, cb) => {
 			}
 		})
 	)
+	console.log('started qandaReceive')
 
 	/* HANDLE RECEIVED MESSAGE */
 	rq(getUserByPhone(data.From))
 		.then(userData => {
 			const {User} = userData
+			console.log('made the request for the user')
 
 			// If there is a User connected to the phone number...
 			if (User) {
+				console.log('there is a user')
 
 				/* ACCOUNT SETUP */
 				// Check if they've completed the account set up.
