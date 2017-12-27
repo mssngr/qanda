@@ -94,6 +94,7 @@ export default (context, cb) => {
 		TWILIO_AUTH_TOKEN,
 		TWILIO_PHONE,
 		GRAPHCOOL_SIMPLE_API_END_POINT,
+		GRAPHCOOL_WEBTASK_AUTH_TOKEN,
 	} = context.secrets
 
 	/* STORAGE FOR RESULTS OF WEBTASK */
