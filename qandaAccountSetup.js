@@ -140,7 +140,7 @@ export default (context, cb) => {
 			console.log('"UPDATING FIRST NAME"')
 			// Update their account and ask if we have their name down correctly.
 			rq(updateUserFirstName(User.id, userMessage))
-				.then(updatedUserData => sendSMS(`Nice to meet you, ${updatedUserData.User.firstName}. Did I spell your name correctly?\n(Reply "Yes" or "No")`))
+				.then(updatedUserData => sendSMS(`Nice to meet you, ${updatedUserData.updateUser.firstName}. Did I spell your name correctly?\n(Reply "Yes" or "No")`))
 				.then(() => cb(null, 'Updated User.firstName'))
 				.catch(error => cb(error))
 			break
