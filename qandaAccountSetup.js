@@ -86,7 +86,7 @@ export default (context, cb) => {
 	const yes = userMessageLC.includes('yes') || userMessageLC === 'y'
 	const no = userMessageLC.includes('no') || userMessageLC === 'n'
 	const zipcode = getTimezoneByZipcode(userMessageDigits) && userMessageDigits
-	const phoneNumber = phone(userMessageDigits)[0]
+	const phoneNumber = userMessageDigits && phone(userMessageDigits)[0]
 
 	/* ACCOUNT SECRETS */
 	const {
