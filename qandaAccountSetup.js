@@ -80,7 +80,7 @@ export default (context, cb) => {
 	const requestBody = context.body
 	const {User, userMessageData} = requestBody
 	const userMessage = userMessageData.Body
-	const userMessageLC = userMessage.toLowerCase
+	const userMessageLC = userMessage.toLowerCase()
 	const userMessageDigits = userMessage.replace(/^\D+/g, '')
 	// Check for common replies in the User's message
 	const yes = userMessageLC.includes('yes') || userMessageLC === 'y'
