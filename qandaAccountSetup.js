@@ -104,9 +104,9 @@ export default (context, cb) => {
 	// Make the Graphcool requests less verbose
 	const rq = req => request(GRAPHCOOL_SIMPLE_API_END_POINT, req)
 	const rqThen = (req, then, then2, then3) => {
-		if (then3) return rq(req).then(then).then(then2).then(then3).catch(error => errors.push(error))
-		if (then2) return rq(req).then(then).then(then2).catch(error => errors.push(error))
-		return rq(req).then(then).catch(error => errors.push(error))
+		if (then3) return rq(req).then(then).then(then2).then(then3).catch(error => cb(error))
+		if (then2) return rq(req).then(then).then(then2).catch(error => cb(error))
+		return rq(req).then(then).catch(error => cb(error))
 	}
 	// Make the Twilio requests less verbose
 	const twilioClient = new Twilio(TWILIO_ACCT_SID, TWILIO_AUTH_TOKEN)
@@ -135,7 +135,8 @@ export default (context, cb) => {
 			// Update their account and ask if we have their name down correctly.
 			rq(updateUserFirstName(User.id, userMessage))
 				.then(updatedUserData => sendSMS(`Nice to meet you, ${updatedUserData.User.firstName}. Did I spell your name correctly?\n(Reply "Yes" or "No")`))
-				.catch(error => errors.push(error))
+				.then(() => cb(null, 'Updated User.firstName'))
+				.catch(error => cb(error))
 			break
 		}
 
@@ -341,17 +342,10 @@ export default (context, cb) => {
 		}
 
 		default: {
-			errors.push('Account setup stage is incorrect.')
+			const error = new Error('Account setup stage is incorrect.')
 			sendSMS(`I'm sorry, ${User.firstName}. It looks like there's something wrong with your account. 🙁 Please contact gabriel@ecliptic.io, letting him know your "account setup stage" is not saved correctly.`)
+			cb(error)
 			break
 		}
-	}
-
-	// Check for errors and send any with the callback.
-	if (errors.length > 0) {
-		cb(errors.toString)
-	// If there's none, send the messages with the callback.
-	} else {
-		cb(null, messages.toString)
 	}
 }
