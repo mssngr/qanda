@@ -21,8 +21,8 @@ const getUserByPhone = phoneNum => (`{
 
 const updateAccountSetupStage = (id, newStage) => (`mutation {
 	updateUser(
-		id: ${id}
-		accountSetupStage: ${newStage}
+		id: "${id}"
+		accountSetupStage: "${newStage}"
 	) {
 		id
 	}
@@ -30,8 +30,8 @@ const updateAccountSetupStage = (id, newStage) => (`mutation {
 
 const updateUserFirstName = (id, firstName) => (`mutation {
 	updateUser(
-		id: ${id}
-		firstName: ${firstName}
+		id: "${id}"
+		firstName: "${firstName}"
 		accountSetupStage: 1
 	) {
 		firstName
@@ -41,7 +41,7 @@ const updateUserFirstName = (id, firstName) => (`mutation {
 const getTimezoneByZipcode = zipcode => zipcodeToTimezone.lookup(zipcode)
 const updateUserTimezone = (id, zipcode) => (`mutation {
 	updateUser(
-		id: ${id}
+		id: "${id}"
 		timezone: "${getTimezoneByZipcode(zipcode)}"
 	) {
 		id
@@ -50,8 +50,8 @@ const updateUserTimezone = (id, zipcode) => (`mutation {
 
 const createPartnership = (PartnershipRequest) => (`mutation {
 	setParter(
-		partner1UserId: ${PartnershipRequest.requestee.id}
-		partner2UserId: ${PartnershipRequest.requester.id}
+		partner1UserId: "${PartnershipRequest.requestee.id}"
+		partner2UserId: "${PartnershipRequest.requester.id}"
 	) {
 		id
 	}
@@ -59,15 +59,15 @@ const createPartnership = (PartnershipRequest) => (`mutation {
 
 const createPartnershipRequest = (requesterId, requesteeId) => (`mutation {
 	createPartnershipRequeset(
-		requesterId: ${requesterId}
-		requesteeId: ${requesteeId}
+		requesterId: "${requesterId}"
+		requesteeId: "${requesteeId}"
 	) {
 		id
 	}
 }`)
 
 const deletePartnershipRequest = (partnershipRequestId) => (`mutation {
-	deletePartnershipRequest(id: ${partnershipRequestId}) {
+	deletePartnershipRequest(id: "${partnershipRequestId}") {
 		id
 	}
 }`)
