@@ -4,6 +4,8 @@ import zipcodeToTimezone from 'zipcode-to-timezone'
 import phone from 'phone'
 import {request} from 'graphql-request'
 
+console.log('Started qandaAccountSetup')
+
 /* GRAPHQL REQUESTS */
 const getUserByPhone = phoneNum => (`{
 	User(phone: "${phoneNum}") {
@@ -121,7 +123,7 @@ export default (context, cb) => {
 		})
 	)
 
-	console.log('started account setup')
+	/* HANDLE RECEIVED MESSAGE */
 	// Let's see where the incoming User is in the account setup stage, and act accordingly.
 	switch (User.accountSetupStage) {
 

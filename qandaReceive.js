@@ -3,6 +3,8 @@ import Twilio from 'twilio'
 import zipcodeToTimezone from 'zipcode-to-timezone'
 import {GraphQLClient} from 'graphql-request'
 
+console.log('Started qandaReceive')
+
 /* GRAPHQL REQUESTS */
 const getUserByPhone = phoneNum => (`{
 	User(phone: "${phoneNum}") {
@@ -108,7 +110,6 @@ export default (context, cb) => {
 			}
 		})
 	)
-	console.log('started qandaReceive')
 
 	/* HANDLE RECEIVED MESSAGE */
 	rq(getUserByPhone(data.From))
@@ -126,6 +127,8 @@ export default (context, cb) => {
 					console.log('account setup')
 					// If they haven't, let's shoot them and their message data over to account setup
 					wt('qandaAccountSetup', {User, userMessageData: data})
+						.then(result => cb(null, result))
+						.catch(error => cb(error))
 				}
 
 				// const currentDate = moment().tz(User.timezone)
