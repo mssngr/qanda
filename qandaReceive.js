@@ -127,6 +127,7 @@ export default (context, cb) => {
 					console.log('account setup')
 					// If they haven't, let's shoot them and their message data over to account setup
 					wt('chainTest2', {data: 'test', foo: {bar: true}})
+					cb(null, 'finished')
 				}
 
 				// const currentDate = moment().tz(User.timezone)
@@ -217,5 +218,4 @@ export default (context, cb) => {
 			// }
 		})
 		.catch(error => cb(error))
-	cb(null, 'finished')
 }
