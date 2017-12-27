@@ -130,6 +130,8 @@ export default (context, cb) => {
 
 		/* UPDATING FIRST NAME */
 		case 0: {
+			console.log('Account Setup Stage: 0')
+			console.log('"UPDATING FIRST NAME"')
 			// Update their account and ask if we have their name down correctly.
 			rq(updateUserFirstName(User.id, userMessage))
 				.then(updatedUserData => sendSMS(`Nice to meet you, ${updatedUserData.User.firstName}. Did I spell your name correctly?\n(Reply "Yes" or "No")`))
@@ -139,6 +141,8 @@ export default (context, cb) => {
 
 		/* CONFIRMING FIRST NAME */
 		case 1: {
+			console.log('Account Setup Stage: 1')
+			console.log('"CONFIRMING FIRST NAME"')
 			// If their name is spelled correctly, move them forward in
 			// the account setup stage and ask them about their zip code.
 			if (yes) {
@@ -162,6 +166,8 @@ export default (context, cb) => {
 
 		/* CONFIRMING ZIPCODE */
 		case 2: {
+			console.log('Account Setup Stage: 2')
+			console.log('"CONFIRMING ZIPCODE"')
 			// If their zipcode is correct, update their account setup stage and ask the next question.
 			if (yes) {
 				rqThen(
@@ -186,6 +192,8 @@ export default (context, cb) => {
 
 		/* CONFIRMING PARTNER REQUEST */
 		case 3: {
+			console.log('Account Setup Stage: 3')
+			console.log('"CONFIRMING PARTNER REQUEST"')
 			// If they do want to set up a partner, ask for their partner's phone number.
 			if (yes) {
 				sendSMS(`That's just what this app was made for! What is your partner's 10-digit phone number? (e.g. 999-999-9999)`)
@@ -214,6 +222,8 @@ export default (context, cb) => {
 
 		/* SENDING PARTNERSHIP REQUEST */
 		case 4: {
+			console.log('Account Setup Stage: 4')
+			console.log('"SENDING PARTNERSHIP REQUEST"')
 			// If they confirm the phone number, check to see if it's tied to an account.
 			if (yes) {
 				rq(getUserByPhone(phoneNumber))
