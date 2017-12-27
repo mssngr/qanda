@@ -1,3 +1,4 @@
+'use latest'; // eslint-disable-line
 /* ACCOUNT SETUP */
 import Twilio from 'twilio'
 import zipcodeToTimezone from 'zipcode-to-timezone'
