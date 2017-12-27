@@ -79,6 +79,7 @@ export default (context, cb) => {
 	// Modify the incoming data to grab message specifics
 	const requestBody = context.body
 	const {User, userMessageData} = requestBody
+	console.log(userMessageData)
 	const userMessage = userMessageData.Body
 	const userMessageLC = userMessage.toLowerCase()
 	const userMessageDigits = userMessage.replace(/^\D+/g, '')
