@@ -79,7 +79,6 @@ export default (context, cb) => {
 	// Modify the incoming data to grab message specifics
 	const requestBody = context.body
 	const {User, userMessageData} = requestBody
-	console.log(userMessageData)
 	const userMessage = userMessageData.Body
 	const userMessageLC = userMessage.toLowerCase()
 	const userMessageDigits = userMessage.replace(/^\D+/g, '')
@@ -119,7 +118,7 @@ export default (context, cb) => {
 	const twilioClient = new Twilio(TWILIO_ACCT_SID, TWILIO_AUTH_TOKEN)
 	const sendSMS = (smsBody, toNumber) => (
 		twilioClient.messages.create({
-			to: toNumber || User.phone,
+			to: toNumber || userMessageData.From,
 			from: TWILIO_PHONE,
 			body: smsBody,
 		}, (error, message) => {
