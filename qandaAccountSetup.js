@@ -3,7 +3,7 @@
 import Twilio from 'twilio'
 import zipcodeToTimezone from 'zipcode-to-timezone'
 import phone from 'phone'
-import {request} from 'graphql-request'
+import {GraphQLClient} from 'graphql-request'
 
 console.log('Started qandaAccountSetup')
 
@@ -102,7 +102,12 @@ export default (context, cb) => {
 
 	/* TOOLS */
 	// Make the Graphcool requests less verbose
-	const rq = req => request(GRAPHCOOL_SIMPLE_API_END_POINT, req)
+	const graphQLClient = new GraphQLClient(GRAPHCOOL_SIMPLE_API_END_POINT, {
+		headers: {
+			Authorization: `Bearer ${GRAPHCOOL_WEBTASK_AUTH_TOKEN}`,
+		},
+	})
+	const rq = req => graphQLClient.request(req)
 	const rqThen = (req, then, then2, then3) => {
 		if (then3) return rq(req).then(then).then(then2).then(then3).catch(error => cb(error))
 		if (then2) return rq(req).then(then).then(then2).catch(error => cb(error))
