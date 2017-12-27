@@ -125,7 +125,7 @@ export default (context, cb) => {
 				if (User.accountSetupStage < 5) {
 					console.log('account setup')
 					// If they haven't, let's shoot them and their message data over to account setup
-					startWebtask('qandaAccountSetup', {User, userMessageData: data})
+					wt('qandaAccountSetup', {User, userMessageData: data})
 				}
 
 				// const currentDate = moment().tz(User.timezone)
