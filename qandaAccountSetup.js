@@ -155,18 +155,21 @@ export default (context, cb) => {
 			if (yes) {
 				rqThen(
 					updateAccountSetupStage(User.id, 2),
-					sendSMS(`Great! It looks like you're texting from the zipcode: ${userMessageData.FromZip}. That's important, because it tells me what timezone you're in (${User.timezone}.) Do I have the correct zipcode?\n(Reply "Yes" or "No")`)
+					sendSMS(`Great! It looks like you're texting from the zipcode: ${userMessageData.FromZip}. That's important, because it tells me what timezone you're in (${User.timezone}.) Do I have the correct zipcode?\n(Reply "Yes" or "No")`),
+					cb(null, 'Asked about zipcode')
 				)
 			} else if (no) {
 				// If their name is not spelled correctly, move them backwards in
 				// the account setup stage and ask their name again.
 				rqThen(
 					updateAccountSetupStage(User.id, 0),
-					sendSMS(`My apologies. How do you spell that, again?`)
+					sendSMS(`My apologies. How do you spell that, again?`),
+					cb(null, 'Rolled user back to Account Setup Stage: 0')
 				)
 			} else {
 				// If we don't quite know how they responded, ask how we spelled their name, again.
 				sendSMS(`I didn't quite catch that last message. I have your name down as ${User.firstName}. Is that spelled correctly?\n(Reply "Yes" or "No")`)
+				cb(null, 'Re-asked first name confirmation question.')
 			}
 			break
 		}
