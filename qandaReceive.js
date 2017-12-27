@@ -3,8 +3,6 @@ import Twilio from 'twilio'
 import zipcodeToTimezone from 'zipcode-to-timezone'
 import {GraphQLClient} from 'graphql-request'
 
-const getTimezoneByZipcode = zipcode => zipcodeToTimezone.lookup(zipcode)
-
 /* GRAPHQL REQUESTS */
 const getUserByPhone = phoneNum => (`{
 	User(phone: "${phoneNum}") {
@@ -17,6 +15,7 @@ const getUserByPhone = phoneNum => (`{
 	}
 }`)
 
+const getTimezoneByZipcode = zipcode => zipcodeToTimezone.lookup(zipcode)
 const createUser = (phoneNum, zipcode) => (`mutation {
 	createUser(
 		phone: "${phoneNum}"
@@ -121,6 +120,7 @@ export default (context, cb) => {
 				/* ACCOUNT SETUP */
 				// Check if they've completed the account set up.
 				if (User.accountSetupStage < 5) {
+					console.log('account setup')
 					// If they haven't, let's shoot them and their message data over to account setup
 					startWebtask('qandaAccountSetup', {User, userMessageData: data})
 				}

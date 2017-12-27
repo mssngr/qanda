@@ -4,9 +4,7 @@ import zipcodeToTimezone from 'zipcode-to-timezone'
 import phone from 'phone'
 import {request} from 'graphql-request'
 
-/* Some useful functions for later */
-const getTimezoneByZipcode = zipcode => zipcodeToTimezone.lookup(zipcode)
-
+/* GRAPHQL REQUESTS */
 const getUserByPhone = phoneNum => (`{
 	User(phone: "${phoneNum}") {
 		id
@@ -37,6 +35,7 @@ const updateUserFirstName = (id, firstName) => (`mutation {
 	}
 }`)
 
+const getTimezoneByZipcode = zipcode => zipcodeToTimezone.lookup(zipcode)
 const updateUserTimezone = (id, zipcode) => (`mutation {
 	updateUser(
 		id: ${id}
@@ -70,23 +69,23 @@ const deletePartnershipRequest = (partnershipRequestId) => (`mutation {
 	}
 }`)
 
-/* Request received from qandaReceive */
+/* MODULE BODY */
 export default (context, cb) => {
 
-	// Data relating to the User's message
+	/* MODIFIED DATA */
+	// Modify the incoming data to grab message specifics
 	const requestBody = context.body
 	const {User, userMessageData} = requestBody
 	const userMessage = userMessageData.Body
 	const userMessageLC = userMessage.toLowerCase
 	const userMessageDigits = userMessage.replace(/^\D+/g, '')
-
 	// Check for common replies in the User's message
 	const yes = userMessageLC.includes('yes') || userMessageLC === 'y'
 	const no = userMessageLC.includes('no') || userMessageLC === 'n'
 	const zipcode = getTimezoneByZipcode(userMessageDigits) && userMessageDigits
 	const phoneNumber = phone(userMessageDigits)[0]
 
-	// Webtask Secrets
+	/* ACCOUNT SECRETS */
 	const {
 		TWILIO_ACCT_SID,
 		TWILIO_AUTH_TOKEN,
@@ -94,19 +93,19 @@ export default (context, cb) => {
 		GRAPHCOOL_SIMPLE_API_END_POINT,
 	} = context.secrets
 
-	// Containers for data that will be sent out with the webtask's callback
+	/* STORAGE FOR RESULTS OF WEBTASK */
 	const errors = []
 	const messages = []
 
-	// Some tools to make the Graphcool requests less verbose
+	/* TOOLS */
+	// Make the Graphcool requests less verbose
 	const rq = req => request(GRAPHCOOL_SIMPLE_API_END_POINT, req)
 	const rqThen = (req, then, then2, then3) => {
 		if (then3) return rq(req).then(then).then(then2).then(then3).catch(error => errors.push(error))
 		if (then2) return rq(req).then(then).then(then2).catch(error => errors.push(error))
 		return rq(req).then(then).catch(error => errors.push(error))
 	}
-
-	// Some tools to make the Twilio messages less verbose
+	// Make the Twilio requests less verbose
 	const twilioClient = new Twilio(TWILIO_ACCT_SID, TWILIO_AUTH_TOKEN)
 	const sendSMS = (smsBody, toNumber) => (
 		twilioClient.messages.create({
@@ -122,6 +121,7 @@ export default (context, cb) => {
 		})
 	)
 
+	console.log('started account setup')
 	// Let's see where the incoming User is in the account setup stage, and act accordingly.
 	switch (User.accountSetupStage) {
 
