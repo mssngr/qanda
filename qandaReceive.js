@@ -10,6 +10,7 @@ const getUserByPhone = phoneNum => (`{
 	User(phone: "${phoneNum}") {
 		id
 		firstName
+		accountSetupStage
 		partner {
 			id
 		}
@@ -120,6 +121,7 @@ export default (context, cb) => {
 			// If there is a User connected to the phone number...
 			if (User) {
 				console.log('there is a user')
+				console.log(User)
 
 				/* ACCOUNT SETUP */
 				// Check if they've completed the account set up.
