@@ -128,7 +128,7 @@ export default (context, cb) => {
 				if (User.accountSetupStage < 5) {
 					console.log('account setup')
 					// If they haven't, let's shoot them and their message data over to account setup
-					wt('chainTest2', {data: 'test', foo: {bar: true}})
+					wt('qandaAccountSetup', {User, userMessageData: data})
 					cb(null, 'finished')
 				}
 
