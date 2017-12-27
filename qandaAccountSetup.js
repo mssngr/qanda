@@ -22,7 +22,7 @@ const getUserByPhone = phoneNum => (`{
 const updateAccountSetupStage = (id, newStage) => (`mutation {
 	updateUser(
 		id: "${id}"
-		accountSetupStage: "${newStage}"
+		accountSetupStage: ${newStage}
 	) {
 		id
 	}
