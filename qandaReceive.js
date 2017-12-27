@@ -1,8 +1,6 @@
 'use latest'; // eslint-disable-line
 import Twilio from 'twilio'
-import moment from 'moment-timezone'
 import zipcodeToTimezone from 'zipcode-to-timezone'
-import phone from 'phone'
 import {GraphQLClient} from 'graphql-request'
 
 const getTimezoneByZipcode = zipcode => zipcodeToTimezone.lookup(zipcode)
@@ -23,33 +21,6 @@ const createUser = (phoneNum, zipcode) => (`mutation {
 	createUser(
 		phone: "${phoneNum}"
 		timezone: "${getTimezoneByZipcode(zipcode)}"
-	) {
-		id
-	}
-}`)
-
-const moveAccountSetupStageForward = (id, currentStage) => (`{
-	updateUser(
-		id: "${id}"
-		accountSetupStage: ${currentStage + 1}
-	)
-}`)
-
-const updateUserFirstName = (id, firstName) => (`{
-	updateUser(
-		id: "${id}"
-		firstName: "${firstName}"
-		accountSetupStage: 1
-	) {
-		id
-	}
-}`)
-
-const updateUserTimezone = (id, zipcode) => (`{
-	updateUser(
-		id: "${id}"
-		timezone: "${getTimezoneByZipcode(zipcode)}"
-		accountSetupStage: 2
 	) {
 		id
 	}

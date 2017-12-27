@@ -18,7 +18,7 @@ const getUserByPhone = phoneNum => (`{
 	}
 }`)
 
-const updateAccountSetupStage = (id, newStage) => (`{
+const updateAccountSetupStage = (id, newStage) => (`mutation {
 	updateUser(
 		id: ${id}
 		accountSetupStage: ${newStage}
@@ -27,7 +27,7 @@ const updateAccountSetupStage = (id, newStage) => (`{
 	}
 }`)
 
-const updateUserFirstName = (id, firstName) => (`{
+const updateUserFirstName = (id, firstName) => (`mutation {
 	updateUser(
 		id: ${id}
 		firstName: ${firstName}
@@ -37,7 +37,7 @@ const updateUserFirstName = (id, firstName) => (`{
 	}
 }`)
 
-const updateUserTimezone = (id, zipcode) => (`{
+const updateUserTimezone = (id, zipcode) => (`mutation {
 	updateUser(
 		id: ${id}
 		timezone: "${getTimezoneByZipcode(zipcode)}"
@@ -46,7 +46,7 @@ const updateUserTimezone = (id, zipcode) => (`{
 	}
 }`)
 
-const createPartnership = (PartnershipRequest) => (`{
+const createPartnership = (PartnershipRequest) => (`mutation {
 	setParter(
 		partner1UserId: ${PartnershipRequest.requestee.id}
 		partner2UserId: ${PartnershipRequest.requester.id}
@@ -55,7 +55,7 @@ const createPartnership = (PartnershipRequest) => (`{
 	}
 }`)
 
-const createPartnershipRequest = (requesterId, requesteeId) => (`{
+const createPartnershipRequest = (requesterId, requesteeId) => (`mutation {
 	createPartnershipRequeset(
 		requesterId: ${requesterId}
 		requesteeId: ${requesteeId}
@@ -64,7 +64,7 @@ const createPartnershipRequest = (requesterId, requesteeId) => (`{
 	}
 }`)
 
-const deletePartnershipRequest = (partnershipRequestId) => (`{
+const deletePartnershipRequest = (partnershipRequestId) => (`mutation {
 	deletePartnershipRequest(id: ${partnershipRequestId}) {
 		id
 	}
@@ -310,9 +310,9 @@ export default (context, cb) => {
 						}
 					})
 					// Also, send the User today's question.
-					'Finish this Section'
 					.then(() => null) // filler, I'll want to send the daily question with this line.
 					.catch(error => errors.push(error))
+				'Finish this Section'
 			} else if (no) {
 				// If they do not confirm the number, put them back to the previous stage
 				// and ask if they want to do a partnership request, at all.
