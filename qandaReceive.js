@@ -19,7 +19,7 @@ const getUserByPhone = phoneNum => (`{
 	}
 }`)
 
-const createUser = (phoneNum, zipcode) => (`{
+const createUser = (phoneNum, zipcode) => (`mutation {
 	createUser(
 		phone: "${phoneNum}"
 		timezone: "${getTimezoneByZipcode(zipcode)}"
