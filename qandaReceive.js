@@ -96,7 +96,7 @@ export default (context, cb) => {
 	// Make the Webtask requests less verbose
 	const wt = require('webtask-require')(WEBTASK_CONTAINER) // eslint-disable-line global-require
 	const startWebtask = (taskName, taskData) => wt(taskName, taskData)
-		.then(result => cblog(result))
+		.then(result => cb(null, result))
 		.catch(error => cb(error))
 	// Make the Twilio requests less verbose
 	const twilioClient = new Twilio(TWILIO_ACCT_SID, TWILIO_AUTH_TOKEN)
