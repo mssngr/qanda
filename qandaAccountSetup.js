@@ -95,8 +95,8 @@ export default (context, cb) => {
 	// Check for common replies in the User's message
 	const yes = userMessageLC.includes('yes') || userMessageLC === 'y'
 	const no = userMessageLC.includes('no') || userMessageLC === 'n'
-	// const zipcode = userMessageDigits && getTimezoneByZipcode(userMessageDigits) && userMessageDigits
-	const phoneNumber = userMessageDigits && phone(userMessageDigits)[0]
+	const zipcode = userMessageDigits && getTimezoneByZipcode(userMessageDigits) && userMessageDigits
+	const phoneNumber = userMessageDigits && phone(userMessageDigits) && phone(userMessageDigits)[0]
 
 	/* ACCOUNT SECRETS */
 	const {
