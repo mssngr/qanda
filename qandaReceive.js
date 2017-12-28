@@ -12,6 +12,7 @@ const getUserByPhone = phoneNum => (`{
 		id
 		firstName
 		accountSetupStage
+		potentialPartnerPhone
 		partner {
 			id
 		}
@@ -95,8 +96,8 @@ export default (context, cb) => {
 	// Make the Webtask requests less verbose
 	const wt = require('webtask-require')(WEBTASK_CONTAINER) // eslint-disable-line global-require
 	const startWebtask = (taskName, taskData) => wt(taskName, taskData)
-		.then(result => messages.push(result))
-		.catch(error => errors.push(error))
+		.then(result => cb(null, result))
+		.catch(error => cb(error))
 	// Make the Twilio requests less verbose
 	const twilioClient = new Twilio(TWILIO_ACCT_SID, TWILIO_AUTH_TOKEN)
 	const sendSMS = (smsBody, toNumber) => (
@@ -104,33 +105,26 @@ export default (context, cb) => {
 			to: toNumber || data.From,
 			from: TWILIO_PHONE,
 			body: smsBody,
-		}, (error, message) => {
-			if (error) {
-				errors.push(error)
-			} else {
-				messages.push(message)
-			}
-		})
+		}, error => error && cb(error))
 	)
 
 	/* HANDLE RECEIVED MESSAGE */
 	rq(getUserByPhone(data.From))
 		.then(userData => {
 			const {User} = userData
-			console.log('made the request for the user')
+			console.log('Made the request for the user')
 
 			// If there is a User connected to the phone number...
 			if (User) {
-				console.log('there is a user')
+				console.log('There is a user')
 				console.log(User)
 
 				/* ACCOUNT SETUP */
 				// Check if they've completed the account set up.
 				if (User.accountSetupStage < 5) {
-					console.log('account setup')
+					console.log('Sending to Account Setup')
 					// If they haven't, let's shoot them and their message data over to account setup
-					wt('qandaAccountSetup', {User, userMessageData: data})
-					cb(null, 'finished')
+					startWebtask('qandaAccountSetup', {User, userMessageData: data})
 				}
 
 				// const currentDate = moment().tz(User.timezone)
@@ -142,33 +136,21 @@ export default (context, cb) => {
 				// If there's not a User connected to the phone number,
 				// and they answered "yes" to setting up an account,
 				// create one for them
-				rq(createUser(data.From, data.FromZip))
-					.then(result => {
-						sendSMS(`Fantastic! What's your first name?`)
-						if (errors.length > 0) {
-							cb(errors.toString())
-						// If there's none, send the messages with the callback.
-						} else {
-							cb(null, result)
-						}
-					})
-					.catch(error => {
-						errors.push(error)
-						if (errors.length > 0) {
-							cb(errors.toString())
-						// If there's none, send the messages with the callback.
-						} else {
-							cb(null, messages.toString())
-						}
-					})
+				rqThen(createUser(data.From, data.FromZip),
+					sendSMS(`Fantastic! What's your first name?`),
+					cb(null, `Created new account and asked the new User's first name.`)
+				)
 				// The created "User" has a default "accountSetupStage" of 0,
 				// So, when they reply, they will be routed to "qandaAccountSetup"
 			} else if (no) {
 				// If they answered "no" to setting up an account, thank them for their time
+				sendSMS(`No problem. Hope you have a great day! Feel free to text me if you ever change your mind.`)
+				cb(null, 'Individual does not want to create a new account. Ended conversation.')
 			} else {
 				// Otherwise, act like this is the first time they've ever messaged
 				// and ask them if they want to create an account
 				sendSMS(`Welcome to Q&A, a simple SMS app that asks you daily questions and sends your answers to your partner. Q&A also saves your answers, year after year, so you can see how your answers have changed over time.\n\nWould you like me to create an account for you?\n(Reply "Yes" or "No")`)
+				cb(null, 'Welcomed new potential user. Asked if they wanted to create an account.')
 			}
 
 			// request(GRAPHCOOL_SIMPLE_API_END_POINT, createUser(data.From, data.FromZip))
