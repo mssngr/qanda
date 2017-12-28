@@ -75,11 +75,12 @@ export default (context, cb) => {
 		WEBTASK_CONTAINER,
 	} = secrets
 
-	/* STORAGE FOR RESULTS OF WEBTASK */
-	const errors = []
-	const messages = []
-
 	/* TOOLS */
+	// Handle the webtask success callbacks
+	const cblog = successMsg => {
+		console.log(successMsg)
+		cb(null, successMsg)
+	}
 	// Make the Graphcool requests less verbose
 	const graphQLClient = new GraphQLClient(GRAPHCOOL_SIMPLE_API_END_POINT, {
 		headers: {
@@ -87,16 +88,15 @@ export default (context, cb) => {
 		},
 	})
 	const rq = req => graphQLClient.request(req)
-	const rqCatch = req => rq(req).catch(error => errors.push(error))
 	const rqThen = (req, then, then2, then3) => {
-		if (then3) return rq(req).then(then).then(then2).then(then3).catch(error => errors.push(error))
-		if (then2) return rq(req).then(then).then(then2).catch(error => errors.push(error))
-		return rq(req).then(then).catch(error => errors.push(error))
+		if (then3) return rq(req).then(then).then(then2).then(then3).catch(error => cb(error))
+		if (then2) return rq(req).then(then).then(then2).catch(error => cb(error))
+		return rq(req).then(then).catch(error => cb(error))
 	}
 	// Make the Webtask requests less verbose
 	const wt = require('webtask-require')(WEBTASK_CONTAINER) // eslint-disable-line global-require
 	const startWebtask = (taskName, taskData) => wt(taskName, taskData)
-		.then(result => cb(null, result))
+		.then(result => cblog(result))
 		.catch(error => cb(error))
 	// Make the Twilio requests less verbose
 	const twilioClient = new Twilio(TWILIO_ACCT_SID, TWILIO_AUTH_TOKEN)
@@ -138,23 +138,23 @@ export default (context, cb) => {
 				// create one for them
 				rqThen(createUser(data.From, data.FromZip),
 					sendSMS(`Fantastic! What's your first name?`),
-					cb(null, `Created new account and asked the new User's first name.`)
+					cblog(`Created new account and asked the new User's first name.`)
 				)
 				// The created "User" has a default "accountSetupStage" of 0,
 				// So, when they reply, they will be routed to "qandaAccountSetup"
 			} else if (no) {
 				// If they answered "no" to setting up an account, thank them for their time
 				sendSMS(`No problem. Hope you have a great day! Feel free to text me if you ever change your mind.`)
-				cb(null, 'Individual does not want to create a new account. Ended conversation.')
+				cblog('Individual does not want to create a new account. Ended conversation.')
 			} else {
 				// Otherwise, act like this is the first time they've ever messaged
 				// and ask them if they want to create an account
 				sendSMS(`Welcome to Q&A, a simple SMS app that asks you daily questions and sends your answers to your partner. Q&A also saves your answers, year after year, so you can see how your answers have changed over time.\n\nWould you like me to create an account for you?\n(Reply "Yes" or "No")`)
-				cb(null, 'Welcomed new potential user. Asked if they wanted to create an account.')
+				cblog('Welcomed new potential user. Asked if they wanted to create an account.')
 			}
 
 			// request(GRAPHCOOL_SIMPLE_API_END_POINT, createUser(data.From, data.FromZip))
-			// 	.catch(error => errors.push(error))
+			// 	.catch(error => cb(error))
 			// // And send a welcome message out to the new user.
 			// twilioClient.messages.create({
 			// 	to: data.From,
@@ -162,7 +162,7 @@ export default (context, cb) => {
 			// 	body: "Welcome to Q&A, where you and your partners' answers to daily questions are texted to each other and saved for posterity. Tell me, what's your first name?",
 			// }, (error, message) => {
 			// 	if (error) {
-			// 		errors.push(error)
+			// 		cb(error)
 			// 	} else {
 			// 		messages.push(message)
 			// 	}
@@ -184,7 +184,7 @@ export default (context, cb) => {
 			// 						sendSMS(`Congrats! You and ${Partner.firstName} are connected. When either of you replies to a Daily Question, the other will be sent the answer. As the years go by, you'll also be reminded of previous years' answers. Have fun!`, User.phone)
 			// 						sendSMS(`Congrats! ${User.firstName} accepted your partner request. When either of you replies to a Daily Question, the other will be sent the answer. As the years go by, you'll also be reminded of previous years' answers. Have fun!`, Partner.phone)
 			// 					})
-			// 					.catch(error => errors.push(error))
+			// 					.catch(error => cb(error))
 			// 			})
 			// 	} else if (body.contains('decline')) {
 			// 		// If they declined, send a message to the requester and delete the request.
@@ -199,7 +199,7 @@ export default (context, cb) => {
 			// 	cb(errors.toString())
 			// // If there's none, send the messages with the callback.
 			// } else {
-			// 	cb(null, messages.toString())
+			// 	cblog(messages.toString())
 			// }
 		})
 		.catch(error => cb(error))
