@@ -54,7 +54,7 @@ export default (context, cb) => {
 		.then(data => {
 			data.allUsers.forEach(user => {
 				sendSMS(
-					`Hello, ${user.firstName}. ${data.Question.text}`,
+					`Hey, ${user.firstName}! Today's question is:\n${data.Question.text}`,
 					user.phone
 				)
 			})

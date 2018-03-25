@@ -16,6 +16,7 @@ const getUserByPhone = phoneNum => (`{
 		potentialPartnerPhone
 		partner {
 			id
+			firstName
 		}
 		timezone
 	}
@@ -48,9 +49,11 @@ const setPartner = (user1Id, user2Id) => (`{
 const getQuestionByDate = date => (`{
 	Question(dateToAsk: "${date}") {
 		id
-		text
 		answers {
-			id
+			text
+			user {
+				id
+			}
 		}
 	}
 }`)
@@ -150,7 +153,17 @@ export default (context, cb) => {
 				// Get today's question
 				rq(getQuestionByDate(today))
 					// Use the user's message to create an answer for today's question
-					.then(questionData => createAnswer(userMessage, questionData.id, User.id))
+					.then(questionData => createAnswer(userMessage, questionData.id, User.id)
+						.then(() => sendSMS(`Great. I'll share your answer with your partner.`))
+						.then(() => {
+							const partnerAnswer = questionData.answers.find(answer => answer.user.id === User.partner.id)
+							if (partnerAnswer) {
+								sendSMS(`${User.partner.id} answered with:\n\n${partnerAnswer.text}`)
+							}
+						})
+						.then(() => sendSMS(`Send something about seeing previous years' responses.`))
+						.catch(error => cb(error))
+					)
 					.catch(error => cb(error))
 			} else if (yes) {
 				/* ACCOUNT CREATION */
