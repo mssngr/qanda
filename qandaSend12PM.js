@@ -53,6 +53,7 @@ export default (context, cb) => {
 	rq(getMessageData)
 		.then(data => {
 			data.allUsers.forEach(user => {
+			  console.log(data.allUsers)
 				sendSMS(
 					`Hey, ${user.firstName}! Today's question is:\n${data.Question.text}`,
 					user.phone
