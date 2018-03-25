@@ -214,7 +214,7 @@
             "error"
           ],
           "no-undef": [
-            "warn"
+            "error"
           ],
           "no-unmodified-loop-condition": [
             "error"

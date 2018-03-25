@@ -2,6 +2,7 @@
 /* RECEIVING SMS */
 import Twilio from 'twilio'
 import zipcodeToTimezone from 'zipcode-to-timezone'
+import moment from 'moment-timezone'
 import {GraphQLClient} from 'graphql-request'
 
 console.log('Started qandaReceive')
@@ -46,10 +47,21 @@ const setPartner = (user1Id, user2Id) => (`{
 
 const getQuestionByDate = date => (`{
 	Question(dateToAsk: "${date}") {
+		id
 		text
 		answers {
 			id
 		}
+	}
+}`)
+
+const createAnswer = (text, questionID, userID) => (`{
+	createAnswer(
+		text: "${text}"
+		questionId: "${questionID}"
+		userId: "${userID}"
+	) {
+		id
 	}
 }`)
 
@@ -112,26 +124,35 @@ export default (context, cb) => {
 	rq(getUserByPhone(data.From))
 		.then(userData => {
 			const {User} = userData
-			console.log('Made the request for the user')
+			console.log('Successfully made the request for the user')
 
 			// If there is a User connected to the phone number...
 			if (User) {
-				console.log('There is a user')
+				console.log('Found a user connected to the phone number')
 				console.log(User)
 
 				/* ACCOUNT SETUP */
 				// Check if they've completed the account set up.
 				if (User.accountSetupStage < 5) {
-					console.log('Sending to Account Setup')
-					// If they haven't, let's shoot them and their message data over to account setup
+					console.log('Account setup is not complete; sending to Account Setup module')
+					// If they haven't, send them and their message data over to account setup
 					startWebtask('qandaAccountSetup', {User, userMessageData: data})
 				}
 
-				// const currentDate = moment().tz(User.timezone)
-				// const today = `${currentDate.month() + 1}/${currentDate.date()}`
-				// request(GRAPHCOOL_SIMPLE_API_END_POINT, getQuestionByDate(today))
-			} else if (yes) {
+				/* DASHBOARD */
+				// If the user simply texted "help", tell them the available commands
 
+				/* DAILY QUESTION */
+				// Otherwise, assume the user sent in an answer to today's daily question
+				// Grab today's date
+				const currentDate = moment().tz(User.timezone)
+				const today = `${currentDate.month() + 1}/${currentDate.date()}`
+				// Get today's question
+				rq(getQuestionByDate(today))
+					// Use the user's message to create an answer for today's question
+					.then(questionData => createAnswer(userMessage, questionData.id, User.id))
+					.catch(error => cb(error))
+			} else if (yes) {
 				/* ACCOUNT CREATION */
 				// If there's not a User connected to the phone number,
 				// and they answered "yes" to setting up an account,
