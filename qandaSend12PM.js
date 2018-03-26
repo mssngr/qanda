@@ -62,14 +62,13 @@ export default (context, cb) => {
 	const today = moment()
 	const todayFormatted = today.format('MM/DD')
 	let currentDay = today.add(1, 'days')
-	rq(createQuestion(todayFormatted))
-	  .then(() => {
-	    while (todayFormatted !== currentDay.format('MM/DD')) {
-		    rq(createQuestion(currentDay.format('MM/DD')))
-		    currentDay = currentDay.add(1, 'days')
-	    }
-	    cblog('added all questions')
-	  })
+	const daysIn2018 = [todayFormatted]
+  while (todayFormatted !== currentDay.format('MM/DD')) {
+    daysIn2018.push(currentDay.format('MM/DD'))
+    currentDay = currentDay.add(1, 'days')
+  }
+  daysIn2018.forEach(day => rq(createQuestion(day)))
+  cblog('added all questions')
 
 	/* SEND DAILY MESSAGES */
 	// rq(getMessageData)
