@@ -67,6 +67,7 @@ export default (context, cb) => {
     daysIn2018.push(currentDay.format('MM/DD'))
     currentDay = currentDay.add(1, 'days')
   }
+  console.log(daysIn2018)
   daysIn2018.forEach(day => rq(createQuestion(day)))
   cblog('added all questions')
 
