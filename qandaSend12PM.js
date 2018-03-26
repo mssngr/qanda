@@ -52,14 +52,10 @@ export default (context, cb) => {
 
 	/* SEND DAILY MESSAGES */
 	rq(getMessageData)
-		.then(data => {
-			data.allUsers.forEach(user => {
-				sendSMS(
-					`Hey, ${user.firstName}! Today's question is:\n${data.Question.text}`,
-					user.phone
-				)
-			})
-		})
+		.then(data => data.allUsers.forEach(user => sendSMS(
+			`Hey, ${user.firstName}! Today's question is:\n${data.Question.text}`,
+			user.phone
+		)))
 		.then(() => cblog(`Sent daily messages.`))
 		.catch(error => cb(error))
 }
