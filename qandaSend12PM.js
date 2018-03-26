@@ -3,28 +3,19 @@ import Twilio from 'twilio'
 import moment from 'moment-timezone'
 import {GraphQLClient} from 'graphql-request'
 
-// const todayObject = moment()
-// const today = todayObject.tz('America/Denver').format('MM/DD')
+const todayObject = moment()
+const today = todayObject.tz('America/Denver').format('MM/DD')
 
 // /* GRAPHQL REQUESTS */
-// const getMessageData = `{
-// 	allUsers {
-// 		phone
-// 		firstName
-// 	}
-// 	Question(dateToAsk: "${today}") {
-// 		text
-// 	}
-// }`
-
-const createQuestion = date => (`mutation {
-	createQuestion(
-    dateToAsk: "${date}"
-    text: "This is a test question."
-  ) {
-    id
-  }
-}`)
+const getMessageData = `{
+	allUsers {
+		phone
+		firstName
+	}
+	Question(dateToAsk: "${today}") {
+		text
+	}
+}`
 
 export default (context, cb) => {
 	/* ACCOUNT SECRETS */
@@ -59,26 +50,12 @@ export default (context, cb) => {
 		}, error => error && cb(error))
 	)
 
-	const today = moment()
-	const todayFormatted = today.format('MM/DD')
-	let currentDay = today.add(1, 'days')
-	const daysIn2018 = [todayFormatted]
-  while (todayFormatted !== currentDay.format('MM/DD')) {
-    daysIn2018.push(currentDay.format('MM/DD'))
-    currentDay = currentDay.add(1, 'days')
-  }
-  console.log(createQuestion(daysIn2018[0]))
-  daysIn2018.forEach(day => rq(createQuestion(day))
-    .catch(err => cb(err))
-  )
-  cblog('added all questions')
-
 	/* SEND DAILY MESSAGES */
-	// rq(getMessageData)
-	// 	.then(data => data.allUsers.forEach(user => sendSMS(
-	// 		`Hey, ${user.firstName}! Today's question is:\n${data.Question.text}`,
-	// 		user.phone
-	// 	)))
-	// 	.then(() => cblog(`Sent daily messages.`))
-	// 	.catch(error => cb(error))
+	rq(getMessageData)
+		.then(data => data.allUsers.forEach(user => sendSMS(
+			`Hey, ${user.firstName}! Today's question is:\n${data.Question.text}`,
+			user.phone
+		)))
+		.then(() => cblog(`Sent daily messages.`))
+		.catch(error => cb(error))
 }
