@@ -69,7 +69,8 @@ export default (context, cb) => {
   }
   console.log(daysIn2018)
   daysIn2018.forEach(day => rq(createQuestion(day)))
-  cblog('added all questions')
+  rq(createQuestion(daysIn2018[1]))
+    .then(() => cblog('added all questions'))
 
 	/* SEND DAILY MESSAGES */
 	// rq(getMessageData)
