@@ -68,10 +68,8 @@ export default (context, cb) => {
 		    rq(createQuestion(currentDay.format('MM/DD')))
 		    currentDay = currentDay.add(1, 'days')
 	    }
+	    cblog('added all questions')
 	  })
-
-
-	cblog('added all questions')
 
 	/* SEND DAILY MESSAGES */
 	// rq(getMessageData)
