@@ -4,7 +4,7 @@ import moment from 'moment-timezone'
 import {GraphQLClient} from 'graphql-request'
 
 const todayObject = moment()
-const today = todayObject.tz("America/Denver").format('MM/DD')
+const today = todayObject.tz('America/Denver').format('MM/DD')
 
 /* GRAPHQL REQUESTS */
 const getMessageData = `{
