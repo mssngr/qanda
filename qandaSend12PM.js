@@ -52,6 +52,7 @@ export default (context, cb) => {
 	/* SEND DAILY MESSAGES */
 	rq(getMessageData)
 		.then(data => {
+		  console.log(allUsers)
 			data.allUsers.forEach(user => {
 			  console.log(user.firstName, data.Question.text, user.phone)
 				sendSMS(
