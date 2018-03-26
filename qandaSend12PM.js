@@ -17,6 +17,7 @@ const getMessageData = `{
 }`
 
 export default (context, cb) => {
+  console.log(today)
 	/* ACCOUNT SECRETS */
 	const {
 		TWILIO_ACCT_SID,
