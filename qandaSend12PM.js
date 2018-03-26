@@ -52,7 +52,6 @@ export default (context, cb) => {
 	/* SEND DAILY MESSAGES */
 	rq(getMessageData)
 		.then(data => {
-		  console.log(allUsers)
 			data.allUsers.forEach(user => {
 			  console.log(user.firstName, data.Question.text, user.phone)
 				sendSMS(
@@ -61,7 +60,6 @@ export default (context, cb) => {
 				)
 			})
 		})
+		.then(() => cblog(allUsers, `Sent daily messages.`))
 		.catch(error => cb(error))
-
-	cblog(`Sent daily messages.`)
 }
