@@ -60,10 +60,9 @@ export default (context, cb) => {
 	)
 
 	const today = moment()
-	const todayFormatted = moment.format('MM/DD')
+	const todayFormatted = today.format('MM/DD')
 	rq(createQuestion(todayFormatted))
 	let currentDay = today.add(1, 'days')
-	console.log(currentDay.format('MM/DD'))
 	while (todayFormatted !== currentDay.format('MM/DD')) {
 		rq(createQuestion(currentDay.format('MM/DD')))
 			.then(() => currentDay = currentDay.add(1, 'days'))
