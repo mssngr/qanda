@@ -18,7 +18,6 @@ const getMessageData = `{
 }`
 
 export default (context, cb) => {
-  console.log(today)
 	/* ACCOUNT SECRETS */
 	const {
 		TWILIO_ACCT_SID,
@@ -55,7 +54,6 @@ export default (context, cb) => {
 	rq(getMessageData)
 		.then(data => {
 			data.allUsers.forEach(user => {
-			  console.log(user.firstName, data.Question.text, user.phone)
 				sendSMS(
 					`Hey, ${user.firstName}! Today's question is:\n${data.Question.text}`,
 					user.phone
