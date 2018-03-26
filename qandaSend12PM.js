@@ -70,6 +70,7 @@ export default (context, cb) => {
   console.log(createQuestion(daysIn2018[0]))
   rq(createQuestion(daysIn2018[0]))
     .then(() => cblog('added all questions'))
+    .catch(err => cb(err))
 
 	/* SEND DAILY MESSAGES */
 	// rq(getMessageData)
