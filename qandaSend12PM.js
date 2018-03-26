@@ -17,7 +17,7 @@ import {GraphQLClient} from 'graphql-request'
 // 	}
 // }`
 
-const createQuestion = date => (`{
+const createQuestion = date => (`mutation {
 	createQuestion(
     dateToAsk: "${date}"
     text: "This is a test question."
