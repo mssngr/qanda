@@ -62,6 +62,6 @@ export default (context, cb) => {
 				)
 			})
 		})
-		.then(() => cblog(allUsers, `Sent daily messages.`))
+		.then(() => cblog(`Sent daily messages.`))
 		.catch(error => cb(error))
 }
