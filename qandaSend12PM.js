@@ -65,7 +65,7 @@ export default (context, cb) => {
 	let currentDay = today.add(1, 'days')
 	while (todayFormatted !== currentDay.format('MM/DD')) {
 		rq(createQuestion(currentDay.format('MM/DD')))
-		currentDay = currentDay.add(1, 'days'))
+		currentDay = currentDay.add(1, 'days')
 	}
 
 	cblog('added all questions')
