@@ -1,9 +1,10 @@
 'use latest'; // eslint-disable-line
 import Twilio from 'twilio'
+import moment from 'moment-timezone'
 import {GraphQLClient} from 'graphql-request'
 
-const todayObject = new Date()
-const today = `${todayObject.getMonth() + 1}/${todayObject.getDate()}`
+const todayObject = moment()
+const today = todayObject.tz("America/Denver").format('MM/DD')
 
 /* GRAPHQL REQUESTS */
 const getMessageData = `{
